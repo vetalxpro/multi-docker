@@ -1,0 +1,19 @@
+sudo: required
+services:
+- docker
+before_install:
+- docker build -t vetalxpro/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+- docker run vetalxpro/react-test npm test -- --coverage
+
+after_success:
+- docker build -t vetalxpro/multi-docker-client ./client
+- docker build -t vetalxpro/multi-docker-nginx ./nginx
+- docker build -t vetalxpro/multi-docker-server ./server
+- docker build -t vetalxpro/multi-docker-worker ./worker
+- echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+- docker push vetalxpro/multi-docker-client
+- docker push vetalxpro/multi-docker-nginx
+- docker push vetalxpro/multi-docker-server
+- docker push vetalxpro/multi-docker-worker
